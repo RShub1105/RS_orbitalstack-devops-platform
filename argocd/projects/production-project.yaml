@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: orbital-production
+  namespace: argocd
+spec:
+  description: Production applications for OrbitalStack
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: orbital-production
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  roles:
+    - name: platform-team
+      description: Can sync production apps
+      policies:
+        - p, proj:orbital-production:platform-team, applications, sync, orbital-production/*, allow
+        - p, proj:orbital-production:platform-team, applications, get, orbital-production/*, allow
+      groups:
+        - platform-team
+

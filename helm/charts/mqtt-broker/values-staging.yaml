@@ -1,0 +1,5 @@
+namespaceOverride: orbital-staging
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/orbital-mqtt-broker-staging
+

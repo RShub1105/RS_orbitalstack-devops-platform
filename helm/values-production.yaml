@@ -1,0 +1,8 @@
+images:
+  telemetry-ingestor:
+    tag: "main"
+  ota-controller:
+    tag: "main"
+  device-api:
+    tag: "main"
+

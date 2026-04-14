@@ -1,0 +1,89 @@
+version: "3.9"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:2.14.2-pg15
+    container_name: orbital-timescaledb
+    environment:
+      POSTGRES_DB: orbital
+      POSTGRES_USER: orbital
+      POSTGRES_PASSWORD: orbital
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orbital -d orbital"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: orbital-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0.20
+    container_name: orbital-mqtt-broker
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mqtt-data:/mosquitto/data
+      - mqtt-logs:/mosquitto/log
+
+  telemetry-ingestor:
+    build:
+      context: ./services/telemetry-ingestor
+    environment:
+      SERVICE_NAME: telemetry-ingestor
+      APP_PORT: 8080
+      DATABASE_URL: postgresql://orbital:orbital@timescaledb:5432/orbital
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  ota-controller:
+    build:
+      context: ./services/ota-controller
+    environment:
+      SERVICE_NAME: ota-controller
+      APP_PORT: 7070
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "7070:7070"
+
+  device-api:
+    build:
+      context: ./services/device-api
+    environment:
+      SERVICE_NAME: device-api
+      APP_PORT: 9000
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+
+volumes:
+  timescaledb-data:
+  mqtt-data:
+  mqtt-logs:
+

@@ -1,0 +1,12 @@
+{
+  "title": "Telemetry Ingestor Overview",
+  "panels": [
+    { "type": "timeseries", "title": "Messages per Second", "targets": [{ "expr": "telemetry_ingestor:msg_rate:5m" }] },
+    { "type": "timeseries", "title": "Lag", "targets": [{ "expr": "telemetry_ingestor:msg_rate:5m" }] },
+    { "type": "timeseries", "title": "HPA Replicas", "targets": [{ "expr": "kube_horizontalpodautoscaler_status_desired_replicas{horizontalpodautoscaler=\"telemetry-ingestor\"}" }] },
+    { "type": "timeseries", "title": "DB Write Latency", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"telemetry-ingestor\"}[5m])) by (le))" }] },
+    { "type": "logs", "title": "Ingestor Logs", "targets": [{ "expr": "{service=\"telemetry-ingestor\"}" }] }
+  ],
+  "schemaVersion": 39
+}
+

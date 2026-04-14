@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "device-api.fullname" . }}
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ include "device-api.namespace" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: device-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+

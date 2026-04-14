@@ -1,0 +1,9 @@
+{{- if .Values.hpa.enabled | default false }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "mqtt-broker.fullname" . }}
+  namespace: {{ include "mqtt-broker.namespace" . }}
+spec: {}
+{{- end }}
+

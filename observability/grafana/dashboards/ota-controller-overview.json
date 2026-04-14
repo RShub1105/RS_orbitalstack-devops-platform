@@ -1,0 +1,12 @@
+{
+  "title": "OTA Controller Overview",
+  "panels": [
+    { "type": "timeseries", "title": "Active Rollouts", "targets": [{ "expr": "ota_controller:rollout_progress:current" }] },
+    { "type": "timeseries", "title": "Devices Updated", "targets": [{ "expr": "sum(rate(http_requests_total{service=\"ota-controller\"}[5m]))" }] },
+    { "type": "timeseries", "title": "Rollout Success Rate", "targets": [{ "expr": "sum(rate(http_requests_total{service=\"ota-controller\"}[5m]))" }] },
+    { "type": "timeseries", "title": "Leader Lease Status", "targets": [{ "expr": "kube_lease_owner{lease=\"ota-controller\"}" }] },
+    { "type": "logs", "title": "Controller Logs", "targets": [{ "expr": "{service=\"ota-controller\"}" }] }
+  ],
+  "schemaVersion": 39
+}
+

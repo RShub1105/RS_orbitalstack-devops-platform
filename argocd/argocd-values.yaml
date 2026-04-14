@@ -1,0 +1,18 @@
+configs:
+  params:
+    server.insecure: true
+  cm:
+    application.resourceTrackingMethod: annotation
+    resource.customizations.health.coordination.k8s.io_Lease: |
+      hs = {}
+      if obj.spec and obj.spec.holderIdentity and obj.spec.renewTime then
+        hs.status = "Healthy"
+        hs.message = "Lease is actively held by " .. obj.spec.holderIdentity
+      else
+        hs.status = "Progressing"
+        hs.message = "Lease is not yet held"
+      end
+      return hs
+  rbac:
+    policy.default: role:readonly
+

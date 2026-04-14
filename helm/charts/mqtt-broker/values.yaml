@@ -1,0 +1,78 @@
+nameOverride: ""
+fullnameOverride: ""
+namespaceOverride: ""
+image:
+  repository: eclipse-mosquitto
+  tag: 2.0.20
+  pullPolicy: IfNotPresent
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+replicaCount: 1
+service:
+  type: LoadBalancer
+  ports:
+    mqtt: 1883
+    tls: 8883
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+persistence:
+  enabled: true
+  accessModes: ["ReadWriteOnce"]
+  size: 10Gi
+  storageClassName: ""
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 0
+probes:
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 3
+config:
+  persistence: "true"
+  log_dest: stdout
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+  targetName: mqtt-broker-secrets
+  data:
+    - secretKey: mqtt_username
+      remoteRef:
+        key: /orbital/mqtt
+        property: username
+    - secretKey: mqtt_password
+      remoteRef:
+        key: /orbital/mqtt
+        property: password
+serviceMonitor:
+  enabled: true
+  interval: 30s
+networkPolicy:
+  enabled: true
+nodeSelector: {}
+tolerations: []
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - telemetry-ingestor
+        topologyKey: kubernetes.io/hostname
+

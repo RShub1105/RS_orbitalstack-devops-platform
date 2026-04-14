@@ -1,0 +1,12 @@
+{
+  "title": "MQTT Broker Overview",
+  "panels": [
+    { "type": "timeseries", "title": "Active Connections", "targets": [{ "expr": "mqtt_broker:active_connections:instant" }] },
+    { "type": "timeseries", "title": "Message Rate", "targets": [{ "expr": "sum(rate(http_requests_total{service=\"mqtt-broker\"}[5m]))" }] },
+    { "type": "timeseries", "title": "Connection Errors", "targets": [{ "expr": "sum(rate(container_network_receive_errors_total{pod=~\"mqtt-broker.*\"}[5m]))" }] },
+    { "type": "timeseries", "title": "PVC Usage", "targets": [{ "expr": "kubelet_volume_stats_used_bytes{persistentvolumeclaim=\"mqtt-broker\"}" }] },
+    { "type": "logs", "title": "Broker Logs", "targets": [{ "expr": "{service=\"mqtt-broker\"}" }] }
+  ],
+  "schemaVersion": 39
+}
+

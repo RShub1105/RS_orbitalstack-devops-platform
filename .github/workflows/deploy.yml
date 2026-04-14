@@ -1,0 +1,59 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start local registry
+        run: docker run -d -p 5000:5000 --name ci-registry registry:2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build and push telemetry-ingestor
+        run: |
+          docker build -t localhost:5000/orbital/telemetry-ingestor:${GITHUB_SHA} services/telemetry-ingestor
+          docker push localhost:5000/orbital/telemetry-ingestor:${GITHUB_SHA}
+
+      - name: Build and push ota-controller
+        run: |
+          docker build -t localhost:5000/orbital/ota-controller:${GITHUB_SHA} services/ota-controller
+          docker push localhost:5000/orbital/ota-controller:${GITHUB_SHA}
+
+      - name: Build and push device-api
+        run: |
+          docker build -t localhost:5000/orbital/device-api:${GITHUB_SHA} services/device-api
+          docker push localhost:5000/orbital/device-api:${GITHUB_SHA}
+
+      - name: Update production tags
+        run: |
+          sed -i "s/tag: production/tag: ${GITHUB_SHA}/" helm/charts/telemetry-ingestor/values-production.yaml
+          sed -i "s/tag: production/tag: ${GITHUB_SHA}/" helm/charts/ota-controller/values-production.yaml
+          sed -i "s/tag: production/tag: ${GITHUB_SHA}/" helm/charts/device-api/values-production.yaml
+
+      - name: Commit GitOps change
+        run: |
+          git config user.name "gitops-bot"
+          git config user.email "gitops-bot@orbitalstack.local"
+          git add helm/charts/*/values-production.yaml
+          git commit -m "chore: promote ${GITHUB_SHA}" || true
+          git push
+

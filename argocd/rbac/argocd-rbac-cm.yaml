@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  policy.default: role:readonly
+  policy.csv: |
+    g, dev-team, role:readonly
+    g, platform-team, role:readonly
+    p, role:readonly, applications, get, */*, allow
+    p, role:readonly, projects, get, *, allow
+    p, dev-team, applications, sync, orbital-staging/*, allow
+    p, platform-team, applications, sync, orbital-production/*, allow
+

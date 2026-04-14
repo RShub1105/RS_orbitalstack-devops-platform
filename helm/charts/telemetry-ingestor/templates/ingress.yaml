@@ -1,0 +1,11 @@
+{{- if .Values.ingress.enabled | default false }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "telemetry-ingestor.fullname" . }}
+  namespace: {{ include "telemetry-ingestor.namespace" . }}
+spec:
+  ingressClassName: nginx
+  rules: []
+{{- end }}
+

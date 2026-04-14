@@ -1,0 +1,31 @@
+kube-prometheus-stack:
+  grafana:
+    defaultDashboardsEnabled: false
+    adminPassword: admin
+    sidecar:
+      dashboards:
+        enabled: true
+        searchNamespace: ALL
+  prometheus:
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      ruleSelectorNilUsesHelmValues: false
+loki:
+  loki:
+    auth_enabled: false
+promtail:
+  config:
+    snippets:
+      pipelineStages:
+        - json:
+            expressions:
+              level: level
+              service: service
+              device_id: device_id
+              trace_id: trace_id
+        - labels:
+            level:
+            service:
+            device_id:
+            trace_id:
+

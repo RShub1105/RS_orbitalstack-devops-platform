@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ota-controller.fullname" . }}
+  namespace: {{ include "ota-controller.namespace" . }}
+  labels:
+    app.kubernetes.io/name: ota-controller
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ota-controller
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+

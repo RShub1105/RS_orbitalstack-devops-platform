@@ -1,0 +1,7 @@
+aws_region   = "us-east-1"
+environment  = "staging"
+owner        = "rahul.sharma"
+cluster_name = "orbitalstack-eks"
+db_username  = "orbital"
+db_password  = "replace-me"
+

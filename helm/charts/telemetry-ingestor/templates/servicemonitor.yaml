@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "telemetry-ingestor.fullname" . }}
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ include "telemetry-ingestor.namespace" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telemetry-ingestor
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+

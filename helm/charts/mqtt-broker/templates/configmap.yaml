@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mqtt-broker.fullname" . }}
+  namespace: {{ include "mqtt-broker.namespace" . }}
+data:
+  mosquitto.conf: |
+    persistence {{ .Values.config.persistence }}
+    persistence_location /mosquitto/data/
+    log_dest {{ .Values.config.log_dest }}
+    listener {{ .Values.service.ports.mqtt }}
+    allow_anonymous true
+    listener {{ .Values.service.ports.tls }}
+    allow_anonymous true
+

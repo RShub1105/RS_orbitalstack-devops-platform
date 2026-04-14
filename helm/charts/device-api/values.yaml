@@ -1,0 +1,66 @@
+namespaceOverride: ""
+image:
+  repository: local.registry/orbital/device-api
+  tag: latest
+  pullPolicy: IfNotPresent
+replicaCount: 2
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+service:
+  port: 9000
+resources:
+  requests:
+    cpu: 200m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+probes:
+  readiness:
+    path: /health/ready
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  liveness:
+    path: /health/live
+    initialDelaySeconds: 10
+    periodSeconds: 10
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  cpuAverageUtilization: 60
+ingress:
+  enabled: true
+  className: nginx
+  host: api.orbitalstack.local
+  path: /api/v1
+  tlsSecretName: orbital-device-api-tls
+config:
+  logLevel: info
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+  targetName: device-api-secrets
+  data:
+    - secretKey: webhook_secret
+      remoteRef:
+        key: /orbital/device-api
+        property: webhook_secret
+serviceMonitor:
+  enabled: true
+  interval: 30s
+

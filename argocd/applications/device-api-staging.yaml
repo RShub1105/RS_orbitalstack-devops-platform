@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: device-api-staging
+  namespace: argocd
+spec:
+  project: orbital-staging
+  source:
+    repoURL: https://github.com/example/orbitalstack-devops-platform.git
+    targetRevision: HEAD
+    path: helm/charts/device-api
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orbital-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

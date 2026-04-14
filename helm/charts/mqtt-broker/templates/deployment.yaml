@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mqtt-broker.fullname" . }}
+  namespace: {{ include "mqtt-broker.namespace" . }}
+spec:
+  serviceName: {{ include "mqtt-broker.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mqtt-broker
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mqtt-broker
+    spec:
+      serviceAccountName: {{ default (include "mqtt-broker.fullname" .) .Values.serviceAccount.name }}
+      affinity:
+{{- toYaml .Values.affinity | nindent 8 }}
+      containers:
+        - name: mqtt-broker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: mqtt
+              containerPort: {{ .Values.service.ports.mqtt }}
+            - name: mqtt-tls
+              containerPort: {{ .Values.service.ports.tls }}
+          readinessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          livenessProbe:
+            tcpSocket:
+              port: mqtt
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          resources:
+{{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            - name: data
+              mountPath: /mosquitto/data
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "mqtt-broker.fullname" . }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "mqtt-broker.fullname" . }}
+

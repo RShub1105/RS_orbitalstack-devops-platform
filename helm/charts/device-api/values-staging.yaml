@@ -1,0 +1,4 @@
+namespaceOverride: orbital-staging
+image:
+  tag: staging
+

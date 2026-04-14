@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    webhook: $slack-webhook
+  template.app-sync-succeeded: |
+    message: "ArgoCD sync succeeded for {{.app.metadata.name}}"
+  template.app-sync-failed: |
+    message: "ArgoCD sync failed for {{.app.metadata.name}}"
+  trigger.on-sync-succeeded: |
+    - when: app.status.operationState.phase in ['Succeeded']
+      send: [app-sync-succeeded]
+  trigger.on-sync-failed: |
+    - when: app.status.operationState.phase in ['Error', 'Failed']
+      send: [app-sync-failed]
+

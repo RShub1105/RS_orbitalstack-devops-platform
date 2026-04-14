@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ota-controller.fullname" . }}
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ include "ota-controller.namespace" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ota-controller
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-staging
+  namespace: argocd
+spec:
+  project: orbital-staging
+  source:
+    repoURL: https://github.com/example/orbitalstack-devops-platform.git
+    targetRevision: HEAD
+    path: observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

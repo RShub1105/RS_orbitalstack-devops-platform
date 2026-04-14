@@ -1,0 +1,12 @@
+{
+  "title": "Device API Overview",
+  "panels": [
+    { "type": "timeseries", "title": "RPS", "targets": [{ "expr": "device_api:request_rate:5m" }] },
+    { "type": "timeseries", "title": "Error Rate", "targets": [{ "expr": "sum(rate(http_requests_total{service=\"device-api\",path=~\".*5..*\"}[5m]))" }] },
+    { "type": "timeseries", "title": "P99 Latency", "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service=\"device-api\"}[5m])) by (le))" }] },
+    { "type": "timeseries", "title": "Active Webhooks", "targets": [{ "expr": "sum(service_up{service=\"device-api\"})" }] },
+    { "type": "logs", "title": "API Logs", "targets": [{ "expr": "{service=\"device-api\"}" }] }
+  ],
+  "schemaVersion": 39
+}
+

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-broker-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  mqtt-broker-overview.json: |
+{{ .Files.Get "grafana/dashboards/mqtt-broker-overview.json" | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telemetry-ingestor-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  telemetry-ingestor-overview.json: |
+{{ .Files.Get "grafana/dashboards/telemetry-ingestor-overview.json" | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ota-controller-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  ota-controller-overview.json: |
+{{ .Files.Get "grafana/dashboards/ota-controller-overview.json" | indent 4 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: device-api-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  device-api-overview.json: |
+{{ .Files.Get "grafana/dashboards/device-api-overview.json" | indent 4 }}
+

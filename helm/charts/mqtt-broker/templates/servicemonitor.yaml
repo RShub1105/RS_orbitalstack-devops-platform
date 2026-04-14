@@ -1,0 +1,18 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "mqtt-broker.fullname" . }}
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ include "mqtt-broker.namespace" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mqtt-broker
+  endpoints:
+    - port: mqtt
+      interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}
+

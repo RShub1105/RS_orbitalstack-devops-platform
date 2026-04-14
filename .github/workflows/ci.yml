@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.15.4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
+
+      - name: Helm lint
+        run: helm lint helm/charts/*
+
+      - name: Terraform fmt
+        run: terraform -chdir=terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform -chdir=terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=terraform validate
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+
+      - name: Validate manifests
+        run: |
+          helm template telemetry-ingestor helm/charts/telemetry-ingestor | kubeconform -strict -ignore-missing-schemas
+          helm template ota-controller helm/charts/ota-controller | kubeconform -strict -ignore-missing-schemas
+          helm template device-api helm/charts/device-api | kubeconform -strict -ignore-missing-schemas
+          helm template mqtt-broker helm/charts/mqtt-broker | kubeconform -strict -ignore-missing-schemas
+
+      - name: Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: services/telemetry-ingestor/Dockerfile
+
+      - name: Install test deps
+        run: pip install -r services/shared/requirements.txt
+
+      - name: Unit tests
+        run: |
+          pytest services/telemetry-ingestor services/ota-controller services/device-api
+

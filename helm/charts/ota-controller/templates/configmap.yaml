@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ota-controller.fullname" . }}
+  namespace: {{ include "ota-controller.namespace" . }}
+data:
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+

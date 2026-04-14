@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+data:
+  resource.customizations.health.coordination.k8s.io_Lease: |
+    hs = {}
+    if obj.spec and obj.spec.holderIdentity and obj.spec.renewTime then
+      hs.status = "Healthy"
+      hs.message = "Lease holder: " .. obj.spec.holderIdentity
+    else
+      hs.status = "Degraded"
+      hs.message = "Lease missing holder or renewal"
+    end
+    return hs
+

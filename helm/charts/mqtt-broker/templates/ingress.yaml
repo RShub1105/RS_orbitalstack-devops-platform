@@ -1,0 +1,11 @@
+{{- if .Values.ingress.enabled | default false }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "mqtt-broker.fullname" . }}
+  namespace: {{ include "mqtt-broker.namespace" . }}
+spec:
+  ingressClassName: nginx
+  rules: []
+{{- end }}
+

@@ -1,0 +1,61 @@
+namespaceOverride: ""
+image:
+  repository: local.registry/orbital/ota-controller
+  tag: latest
+  pullPolicy: IfNotPresent
+replicaCount: 1
+serviceAccount:
+  create: true
+  name: ""
+  annotations:
+    eks.amazonaws.com/role-arn: ""
+service:
+  port: 7070
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+strategy:
+  type: Recreate
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 0
+probes:
+  readiness:
+    path: /ready
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    periodSeconds: 20
+config:
+  logLevel: info
+externalSecret:
+  enabled: true
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+  targetName: ota-controller-secrets
+  data:
+    - secretKey: s3_bucket
+      remoteRef:
+        key: /orbital/firmware
+        property: bucket
+serviceMonitor:
+  enabled: true
+  interval: 30s
+networkPolicy:
+  enabled: true
+leaderElection:
+  leaseDurationSeconds: 30
+  renewDeadlineSeconds: 20
+  retryPeriodSeconds: 5
+  sidecarImage: registry.k8s.io/leader-elector:0.5
+ingress:
+  enabled: false
+

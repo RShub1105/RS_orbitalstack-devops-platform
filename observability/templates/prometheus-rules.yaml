@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: orbitalstack-rules
+  namespace: monitoring
+spec:
+  groups:
+    - name: orbitalstack.recording
+      rules:
+        - record: telemetry_ingestor:msg_rate:5m
+          expr: sum(rate(http_requests_total{service="telemetry-ingestor"}[5m]))
+        - record: mqtt_broker:active_connections:instant
+          expr: sum(service_up{service="mqtt-broker"})
+        - record: ota_controller:rollout_progress:current
+          expr: max(service_up{service="ota-controller"})
+        - record: device_api:request_rate:5m
+          expr: sum(rate(http_requests_total{service="device-api"}[5m]))
+    - name: orbitalstack.alerts
+      rules:
+        - alert: MQTTBrokerDown
+          expr: kube_pod_status_ready{namespace=~"orbital-.*", pod=~"mqtt-broker.*", condition="true"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            priority: p1
+          annotations:
+            summary: MQTT broker pod is not ready
+        - alert: TelemetryIngestorLag
+          expr: telemetry_ingestor:msg_rate:5m < 10000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Telemetry ingestion lag indicates backlog growth
+        - alert: OTARolloutStalled
+          expr: changes(ota_controller:rollout_progress:current[15m]) == 0
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            summary: OTA rollout progress is stalled
+        - alert: DeviceAPIHighErrorRate
+          expr: sum(rate(http_requests_total{service="device-api",path=~".*5..*"}[5m])) / sum(rate(http_requests_total{service="device-api"}[5m])) > 0.02
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Device API 5xx rate is above 2%
+        - alert: NodeMemoryPressure
+          expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Node memory usage is above 85%
+

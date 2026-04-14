@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: orbital-staging
+  namespace: argocd
+spec:
+  description: Staging applications for OrbitalStack
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: orbital-staging
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  roles:
+    - name: dev-team
+      description: Can sync staging apps
+      policies:
+        - p, proj:orbital-staging:dev-team, applications, sync, orbital-staging/*, allow
+        - p, proj:orbital-staging:dev-team, applications, get, orbital-staging/*, allow
+      groups:
+        - dev-team
+

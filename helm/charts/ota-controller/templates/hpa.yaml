@@ -1,0 +1,9 @@
+{{- if .Values.hpa.enabled | default false }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "ota-controller.fullname" . }}
+  namespace: {{ include "ota-controller.namespace" . }}
+spec: {}
+{{- end }}
+
