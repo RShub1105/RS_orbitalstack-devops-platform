@@ -1,5 +1,5 @@
 namespaceOverride: orbital-production
 image:
   pullPolicy: Always
-  tag: production
+  tag: 2422f0923cf72ce25fcff28f80abc6bd375dbf78
 
