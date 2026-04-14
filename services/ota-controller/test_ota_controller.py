@@ -13,3 +13,4 @@ client = TestClient(app)
 def test_drain():
     response = client.post("/drain")
     assert response.status_code == 200
+

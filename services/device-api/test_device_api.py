@@ -13,3 +13,4 @@ client = TestClient(app)
 def test_live():
     response = client.get("/health/live")
     assert response.status_code == 200
+
