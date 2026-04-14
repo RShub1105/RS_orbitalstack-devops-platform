@@ -29,11 +29,11 @@ module "s3" {
 }
 
 module "iam" {
-  source               = "./modules/iam"
-  environment          = var.environment
-  tags                 = local.common_tags
-  telemetry_oidc_arn   = module.eks.oidc_provider_arn
-  telemetry_oidc_url   = module.eks.oidc_provider_url
+  source             = "./modules/iam"
+  environment        = var.environment
+  tags               = local.common_tags
+  telemetry_oidc_arn = module.eks.oidc_provider_arn
+  telemetry_oidc_url = module.eks.oidc_provider_url
 }
 
 module "timescaledb" {
@@ -52,4 +52,3 @@ module "iot" {
   environment = var.environment
   tags        = local.common_tags
 }
-
