@@ -61,6 +61,10 @@ externalSecret:
 serviceMonitor:
   enabled: true
   interval: 30s
+ingress:
+  enabled: false
+hpa:
+  enabled: false
 networkPolicy:
   enabled: true
 nodeSelector: {}
@@ -75,4 +79,3 @@ affinity:
               values:
                 - telemetry-ingestor
         topologyKey: kubernetes.io/hostname
-
